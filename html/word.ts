@@ -1,4 +1,4 @@
-const url = "http://localhost:8080/word";
+const url = "https://gentle-fortress-42768.herokuapp.com/word";
 import { postData } from './postdata';
 
 function loadWord() {
