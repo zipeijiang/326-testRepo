@@ -26,6 +26,7 @@ function postData(url, data) {
         return resp;
     });
 }
+exports.postData = postData;
 
 },{}],2:[function(require,module,exports){
 "use strict";
