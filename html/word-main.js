@@ -90,6 +90,7 @@ function search() {
         }
     }))();
 }
+exports.search = search;
 function defRead() {
     (() => __awaiter(this, void 0, void 0, function* () {
         let doc = document;
@@ -118,6 +119,7 @@ function defRead() {
         }
     }))();
 }
+exports.defRead = defRead;
 function showDefBar() {
     (() => __awaiter(this, void 0, void 0, function* () {
         let doc = document;
@@ -135,6 +137,7 @@ function showDefBar() {
         }
     }))();
 }
+exports.showDefBar = showDefBar;
 function addDef() {
     (() => __awaiter(this, void 0, void 0, function* () {
         let doc = document;
@@ -164,6 +167,7 @@ function addDef() {
         }
     }))();
 }
+exports.addDef = addDef;
 window.onload = loadWord;
 
 },{"./postdata":1}]},{},[2]);
