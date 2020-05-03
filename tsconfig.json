@@ -12,5 +12,5 @@
 	"pretty": true,
 	"module": "commonjs",
     },
-    "files": [ "myserver.ts", "postgres-database.ts", "server-main.ts" ]
+    "files": [ "server_sql.ts", "database_sql.ts", "main_sql.ts" ]
 }
