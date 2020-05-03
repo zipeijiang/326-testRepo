@@ -10,7 +10,22 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const postdata = require("./postdata");
+function postData(url, data) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const resp = yield fetch(url, {
+            method: 'POST',
+            mode: 'cors',
+            cache: 'no-cache',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            redirect: 'follow',
+            body: JSON.stringify(data)
+        });
+        return resp;
+    });
+}
 exports.postData = postData;
 
 },{}],2:[function(require,module,exports){
