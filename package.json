@@ -1,15 +1,8 @@
 {
-  "name": "sql",
+  "name": "326-testRepo",
   "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "ts-node ./main_sql.ts",
-    "dev": "nodemon -x ts-node ./main_sql.ts"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "description": "",
+  "main": "database_sql.js",
   "dependencies": {
     "express": "^4.17.1",
     "level": "^6.0.1",
@@ -17,16 +10,20 @@
     "pg-promise": "^10.5.2",
     "typescript": "^3.8.3"
   },
-  "devDependencies": {
-    "@types/node": "^13.13.4"
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node main_sql.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/zipeijiang/326-testRepo.git"
   },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "bugs": {
     "url": "https://github.com/zipeijiang/326-testRepo/issues"
   },
-  "homepage": "https://github.com/zipeijiang/326-testRepo#readme",
-  "description": ""
+  "homepage": "https://github.com/zipeijiang/326-testRepo#readme"
 }
