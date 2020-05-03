@@ -18,7 +18,7 @@ export class Server{
             response.header('Access-Control-Allow-Headers', '*');
             next();
         });
-            
+        
         this.server.use('/', express.static('./html'));
         this.server.use(express.json());
 
@@ -29,6 +29,13 @@ export class Server{
         this.router.post('/getDefinitionByLanguage', [this.errorHandler.bind(this),this.getDefHandler.bind(this)]); //take word and language, return definition in that language
         this.router.post('/pronunciation', [this.errorHandler.bind(this),this.pronHandler.bind(this)]); //take word, pronunciation, user address
         this.router.post('/delpronunciation', [this.delpronHandler.bind(this)]); // delete pronunciation according to ID
+
+        this.router.post('/addcomment', this.addCommentHandler.bind(this)); //add comment, takes pronunID, user, text
+        this.router.post('/delcomment', this.delCommentHandler.bind(this)); // delete comment by commentID, takes commentID
+        this.router.post('/getcomment', this.getCommentHandler.bind(this)); // get all comments by pronunID, takes pronunID
+
+        this.router.post('/getpronunciation', this.getPronuntHandler.bind(this)); // get all comments by word, takes word
+        this.router.post('/addPronunLikes', this.addPronunLikesHandler.bind(this)); // get all comments by word, takes word
 
 
 
@@ -77,9 +84,30 @@ export class Server{
 	    next();
 	}
     }
+    
+    private async addCommentHandler(request, response) : Promise<void> {
+        await this.addcomment(request.body.pronunID, request.body.user, request.body.text, response);
+        }
+    private async delCommentHandler(request, response) : Promise<void> {
+        await this.delcomment(request.body.commentID, response);
+        }    
+    private async getCommentHandler(request, response) : Promise<void> {
+        await this.getComment(request.body.pronunID, response);
+        }
+
+
+    private async getPronuntHandler(request, response) : Promise<void> {
+        await this.getPronun(request.body.word, response);
+        }
+    private async addPronunLikesHandler(request, response) : Promise<void> {
+        await this.addLikes(request.body.pronunID, response);
+        }
+    
+/*Handlers Ends Here*/
+
     public listen(port) : void  {
-        this.server.listen(port);
-    }
+            this.server.listen(port);
+        }
 
     public async create(word:string, img:string, languages:string,definition:string,response) : Promise<void> { //create the word
         console.log("creating word in create '" + word + "'");
@@ -165,6 +193,113 @@ export class Server{
         }
         ));
         response.end();
+    }
+
+    public async addcomment(pronunID:number, user:string, text:string, response): Promise<void>{
+        console.log("add comment by user '" + user)
+        let info = await this.dataBase.addcomment(pronunID, user, text);
+        if (info !== null){
+            response.write(JSON.stringify(
+                {'result' : 'comment added'
+            }));
+        } else{
+            response.write(JSON.stringify(
+                {'result' : 'error'
+            }));
+        }
+        response.end();
+    }
+
+    public async delcomment(commentID:number, response): Promise<void>{
+        console.log("delete comment ID:" + commentID);
+        let info = await this.dataBase.deletecomment(commentID);
+        if (info !== null){
+            response.write(JSON.stringify(
+                {'result' : 'comment deleted',
+                'id' : commentID
+            }));
+        } else{
+            response.write(JSON.stringify(
+                {'result' : 'error'
+            }));
+        }
+        response.end();
+    }
+
+    public async getComment(pronunID:number, response): Promise<void>{
+        console.log('get comment of pronun ' + pronunID);
+        let info = await this.dataBase.getcomment(pronunID);
+        if(info==null){
+            // no word with specific word being found.
+            response.write(JSON.stringify(
+                {'result' : 'error',
+                'pronunID' : pronunID
+            }));
+        } else{
+            let result = {'result' : 'success',
+            'comments' : info
+            };
+            response.write(JSON.stringify(result));
+            console.log(JSON.stringify(result));
+        }
+	    response.end();
+    }
+////////////////////////////////////////////
+    public async addPronun(word:string, audio:string, address:string, response): Promise<void>{
+        let info = await this.dataBase.addPronun(word, audio, address);
+        if(info==null){
+            // no word with specific word being found.
+            response.write(JSON.stringify(
+                {'result' : 'error',
+                'word' : word
+            }));
+        } else{
+            let result = {'result' : 'success',
+            'word' : word
+            };
+            response.write(JSON.stringify(result));
+            console.log(JSON.stringify(result));
+        }
+	    response.end();
+
+    }
+    public async getPronun(word:string, response): Promise<void>{
+        console.log('get pronun of word ' + word);
+        let info = await this.dataBase.getPronun(word);
+        if(info==null){
+            // no word with specific word being found.
+            console.log('error get Pronun failed');
+            response.write(JSON.stringify(
+                {'result' : 'error',
+                'word' : word
+            }));
+        } else{
+            let result = {'result' : 'success',
+            'pronuns' : info
+            };
+            response.write(JSON.stringify(result));
+            console.log(JSON.stringify(result));
+        }
+	    response.end();
+    }
+
+    public async addLikes(pronunID:number, response): Promise<void>{
+        console.log('get likes of pronun ' + pronunID);
+        let info = await this.dataBase.addLikes(pronunID);
+        if(info==null){
+            // no word with specific word being found.
+            response.write(JSON.stringify(
+                {'result' : 'error',
+                'likes' : 'error'
+            }));
+        } else{
+            let result = {'result' : 'success',
+            'likes' : info['likes']
+            };
+            response.write(JSON.stringify(result));
+            console.log(JSON.stringify(result));
+        }
+	    response.end();
     }
 }
 

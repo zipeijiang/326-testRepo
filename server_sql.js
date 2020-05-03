@@ -8,33 +8,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const worker_threads_1 = require("worker_threads");
 let http = require('http');
@@ -61,6 +34,11 @@ class Server {
         this.router.post('/getDefinitionByLanguage', [this.errorHandler.bind(this), this.getDefHandler.bind(this)]); //take word and language, return definition in that language
         this.router.post('/pronunciation', [this.errorHandler.bind(this), this.pronHandler.bind(this)]); //take word, pronunciation, user address
         this.router.post('/delpronunciation', [this.delpronHandler.bind(this)]); // delete pronunciation according to ID
+        this.router.post('/addcomment', this.addCommentHandler.bind(this)); //add comment, takes pronunID, user, text
+        this.router.post('/delcomment', this.delCommentHandler.bind(this)); // delete comment by commentID, takes commentID
+        this.router.post('/getcomment', this.getCommentHandler.bind(this)); // get all comments by pronunID, takes pronunID
+        this.router.post('/getpronunciation', this.getPronuntHandler.bind(this)); // get all comments by word, takes word
+        this.router.post('/addPronunLikes', this.addPronunLikesHandler.bind(this)); // get all comments by word, takes word
         this.router.post('*', (request, response) => __awaiter(this, void 0, void 0, function* () {
             response.send(JSON.stringify({ "result": "command-not-found" }));
         }));
@@ -115,6 +93,32 @@ class Server {
             }
         });
     }
+    addCommentHandler(request, response) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.addcomment(request.body.pronunID, request.body.user, request.body.text, response);
+        });
+    }
+    delCommentHandler(request, response) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.delcomment(request.body.commentID, response);
+        });
+    }
+    getCommentHandler(request, response) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.getComment(request.body.pronunID, response);
+        });
+    }
+    getPronuntHandler(request, response) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.getPronun(request.body.word, response);
+        });
+    }
+    addPronunLikesHandler(request, response) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.addLikes(request.body.pronunID, response);
+        });
+    }
+    /*Handlers Ends Here*/
     listen(port) {
         this.server.listen(port);
     }
@@ -201,6 +205,118 @@ class Server {
                 'word': worker_threads_1.workerData,
                 'id': info['id']
             }));
+            response.end();
+        });
+    }
+    addcomment(pronunID, user, text, response) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log("add comment by user '" + user);
+            let info = yield this.dataBase.addcomment(pronunID, user, text);
+            if (info !== null) {
+                response.write(JSON.stringify({ 'result': 'comment added'
+                }));
+            }
+            else {
+                response.write(JSON.stringify({ 'result': 'error'
+                }));
+            }
+            response.end();
+        });
+    }
+    delcomment(commentID, response) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log("delete comment ID:" + commentID);
+            let info = yield this.dataBase.deletecomment(commentID);
+            if (info !== null) {
+                response.write(JSON.stringify({ 'result': 'comment deleted',
+                    'id': commentID
+                }));
+            }
+            else {
+                response.write(JSON.stringify({ 'result': 'error'
+                }));
+            }
+            response.end();
+        });
+    }
+    getComment(pronunID, response) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log('get comment of pronun ' + pronunID);
+            let info = yield this.dataBase.getcomment(pronunID);
+            if (info == null) {
+                // no word with specific word being found.
+                response.write(JSON.stringify({ 'result': 'error',
+                    'pronunID': pronunID
+                }));
+            }
+            else {
+                let result = { 'result': 'success',
+                    'comments': info
+                };
+                response.write(JSON.stringify(result));
+                console.log(JSON.stringify(result));
+            }
+            response.end();
+        });
+    }
+    ////////////////////////////////////////////
+    addPronun(word, audio, address, response) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let info = yield this.dataBase.addPronun(word, audio, address);
+            if (info == null) {
+                // no word with specific word being found.
+                response.write(JSON.stringify({ 'result': 'error',
+                    'word': word
+                }));
+            }
+            else {
+                let result = { 'result': 'success',
+                    'word': word
+                };
+                response.write(JSON.stringify(result));
+                console.log(JSON.stringify(result));
+            }
+            response.end();
+        });
+    }
+    getPronun(word, response) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log('get pronun of word ' + word);
+            let info = yield this.dataBase.getPronun(word);
+            if (info == null) {
+                // no word with specific word being found.
+                console.log('error get Pronun failed');
+                response.write(JSON.stringify({ 'result': 'error',
+                    'word': word
+                }));
+            }
+            else {
+                let result = { 'result': 'success',
+                    'pronuns': info
+                };
+                response.write(JSON.stringify(result));
+                console.log(JSON.stringify(result));
+            }
+            response.end();
+        });
+    }
+    addLikes(pronunID, response) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log('get likes of pronun ' + pronunID);
+            let info = yield this.dataBase.addLikes(pronunID);
+            if (info == null) {
+                // no word with specific word being found.
+                response.write(JSON.stringify({ 'result': 'error',
+                    'likes': 'error'
+                }));
+            }
+            else {
+                let result = { 'result': 'success',
+                    'likes': info['likes']
+                };
+                response.write(JSON.stringify(result));
+                console.log(JSON.stringify(result));
+            }
             response.end();
         });
     }
