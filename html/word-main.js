@@ -40,7 +40,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const url = "https://gentle-fortress-42768.herokuapp.com//word";
+const url = "https://gentle-fortress-42768.herokuapp.com/word";
 const postdata_1 = require("./postdata");
 function loadWord() {
     (() => __awaiter(this, void 0, void 0, function* () {
