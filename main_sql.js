@@ -6,4 +6,4 @@ const theDatabase = new database_sql_1.Database('wojhwndc'); // CHANGE THIS
 console.log("database OK");
 const theServer = new server_sql_1.Server(theDatabase);
 console.log("Server OK");
-theServer.listen(process.env.PORT || 8080);
+theServer.listen(8080);
