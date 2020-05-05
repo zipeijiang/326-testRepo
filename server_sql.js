@@ -61,12 +61,17 @@ class Server {
         this.router.post('/changeinfo', [this.errorUserHandler.bind(this), this.changeinfoHandler.bind(this)]);
         //WORD FUNCTION
         this.router.post('/word/new', this.createHandler.bind(this));
+        this.router.post('/new', this.createHandler.bind(this));
         this.router.post('/word/definition', [this.errorHandler.bind(this), this.defHandler.bind(this)]);
+        this.router.post('/definition', [this.errorHandler.bind(this), this.defHandler.bind(this)]);
         this.router.post('/word/delete', [this.errorHandler.bind(this), this.deleteHandler.bind(this)]);
+        this.router.post('/delete', [this.errorHandler.bind(this), this.deleteHandler.bind(this)]);
         this.router.post('/word/view', [this.errorHandler.bind(this), this.viewHandler.bind(this)]);
+        this.router.post('/view', [this.errorHandler.bind(this), this.viewHandler.bind(this)]);
         //|-For main page browse
         this.router.post('/mainview', this.mainpageviewHandler.bind(this));
         this.router.post('/getDefinitionByLanguage', [this.errorHandler.bind(this), this.getDefHandler.bind(this)]); //take word and language, return definition in that language
+        this.router.post('/word/getDefinitionByLanguage', [this.errorHandler.bind(this), this.getDefHandler.bind(this)]); //take word and language, return definition in that language
         //PRONUNCIATION FUNCTION
         this.router.post('/word/addpronunciation', this.pronHandler.bind(this)); //get all comments by word, takes word
         this.router.post('/word/getpronunciation', this.getPronunHandler.bind(this)); //get all comments by word, takes word
