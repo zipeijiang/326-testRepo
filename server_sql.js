@@ -79,7 +79,7 @@ class Server {
         this.router.post('*', (request, response) => __awaiter(this, void 0, void 0, function* () {
             response.send(JSON.stringify({ "result": "command-not-found" }));
         }));
-        this.server.use('/word', this.router);
+        this.server.use('/public', this.router);
     }
     //Word Handlers
     createHandler(request, response) {
