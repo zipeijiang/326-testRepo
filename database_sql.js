@@ -39,7 +39,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 class Database {
     constructor(dbName) {
         this.pgp = require('pg-promise')();
-        this.uri = "postgres://wojhwndc:Yi2Jd5HN3nAcMRvi79-77AFxiSQ1TSaL@drona.db.elephantsql.com:5432/wojhwndc";
+        this.uri = "postgres://ilixcuof:jQzvSECVMmriwhIGpD8DNrgTli8pUYzU@drona.db.elephantsql.com:5432/ilixcuof";
         this.dbName = dbName;
         this.db = this.pgp(this.uri);
         (() => __awaiter(this, void 0, void 0, function* () {

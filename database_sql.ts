@@ -1,6 +1,6 @@
 export class Database {
     private pgp = require('pg-promise')();
-    private uri = "postgres://wojhwndc:Yi2Jd5HN3nAcMRvi79-77AFxiSQ1TSaL@drona.db.elephantsql.com:5432/wojhwndc";
+    private uri = "postgres://ilixcuof:jQzvSECVMmriwhIGpD8DNrgTli8pUYzU@drona.db.elephantsql.com:5432/ilixcuof";
     private db: any;
     private dbName : string;
 
@@ -281,7 +281,7 @@ export class Database {
 //Pronunciation
 public async addPronun(word: string, audio:string, address:string): Promise<any>{
     try{
-        await this.db.any('INSERT INTO pronunTable(word, userID, pronunciation, address, likes) VALUES ($1, $2, $3, $4, $5)', [word, 'John', audio, address, 0]);
+        await this.db.any('INSERT INTO pronTable(word, userID, pronunciation, address, likes) VALUES ($1, $2, $3, $4, $5)', [word, 'John', audio, address, 0]);
         let result = {'result' : 'success'};
         return result;
     } catch(err){
