@@ -348,7 +348,7 @@ class Database {
     addPronun(word, audio, address) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                yield this.db.any('INSERT INTO pronunTable(word, userID, pronunciation, address, likes) VALUES ($1, $2, $3, $4, $5)', [word, 'John', audio, address, 0]);
+                yield this.db.any('INSERT INTO pronTable(word, userID, pronunciation, address, likes) VALUES ($1, $2, $3, $4, $5)', [word, 'John', audio, address, 0]);
                 let result = { 'result': 'success' };
                 return result;
             }
