@@ -2,38 +2,38 @@ export class Database {
     private pgp = require('pg-promise')();
     private uri = "postgres://wojhwndc:Yi2Jd5HN3nAcMRvi79-77AFxiSQ1TSaL@drona.db.elephantsql.com:5432/wojhwndc";
     private db: any;
-    private dbName : string = "wojhwndc";
+    private dbName : string;
 
     constructor(dbName : string) {
     	this.dbName = dbName;
         this.db = this.pgp(this.uri);
         (async () => {
-            
-        try {
-            await this.db.none('CREATE TABLE IF NOT EXISTS wordTable (word VARCHAR(50) PRIMARY KEY, img VARCHAR(200), views INTEGER DEFAULT 0, languages VARCHAR(200))');
-             } catch (e) {
-            console.log('wordTable Already created.');
+            try {
+                await this.db.none('CREATE TABLE IF NOT EXISTS wordTable (word VARCHAR(50) PRIMARY KEY, img VARCHAR(200), views INTEGER DEFAULT 0, languages VARCHAR(200))');
+                 } catch (e) {
+                console.log('wordTable Already created.');
+                }
+            try {
+            // userinfo table
+            let result2 = await this.db.none('CREATE TABLE userinfo(id varchar(100) PRIMARY KEY,username varchar(100),password varchar(100),portrait varchar(10),registered_at DATE,location varchar(100))');
+            console.log(JSON.stringify(result2)); 
+
+            } catch (e) {
+            console.log('Already created.');
             }
-        try {
-            await this.db.none('CREATE TABLE IF NOT EXISTS pronTable (id serial NOT NULL PRIMARY KEY, word VARCHAR(50), userID VARCHAR(50), pronunciation VARCHAR(200), address VARCHAR(200), likes integer, FOREIGN KEY (word) REFERENCES wordTable(word));');
-             } catch (e) {
-            console.log('pronTable Already created.');
+            try {
+                await this.db.none('CREATE TABLE IF NOT EXISTS comment (id serial NOT NULL PRIMARY KEY, pronunID INTEGER REFERENCES pronTable(id) ON DELETE CASCADE, userID VARCHAR(50), text VARCHAR(250), date TIMESTAMP)');
+                 } catch (e) {
+                console.log('comment Already created.');
+                }
+            //pronunTable
+            try{
+                await this.db.none('CREATE TABLE IF NOT EXISTS pronTable (id serial NOT NULL PRIMARY KEY, word VARCHAR(50) REFERENCES wordTable(word) ON DELETE CASCADE, userID VARCHAR(50), pronunciation VARCHAR(200), address VARCHAR(200), likes integer');   
+            } catch (e){
+                console.log('Already created.');
             }
-        try {
-            await this.db.none('CREATE TABLE IF NOT EXISTS userTable (userID VARCHAR(50) PRIMARY KEY)');
-             } catch (e) {
-            console.log('userTable Already created.');
-            }
-        try {
-            await this.db.none('CREATE TABLE IF NOT EXISTS changelogTable (word VARCHAR(50), userID VARCHAR(200), action VARCHAR(50), date TIMESTAMP, FOREIGN KEY (word) REFERENCES wordTable(word), FOREIGN KEY (userID) REFERENCES userTable(userID))');
-             } catch (e) {
-            console.log(e);
-             }
-        try {
-            await this.db.none('CREATE TABLE IF NOT EXISTS comment (id serial NOT NULL PRIMARY KEY, pronunID INTEGER, userID VARCHAR(50), text VARCHAR(250), date TIMESTAMP)');
-             } catch (e) {
-            console.log('comment Already created.');
-            }
+
+
         })();
     }
     //create a new word or update img of an existing word (doesn't update definition!)
@@ -42,27 +42,26 @@ export class Database {
 
         try {
             await this.db.none('INSERT INTO wordTable(word, img, languages) values ($1, $2, $3)', [word, img, lang]);
-            console.log('added word successfully');
+            console.log('added word successfully')
         } catch (err) {
             try {
-                console.log(err);
-                await this.db.none('UPDATE wordTable SET img = $2 WHERE word = $1', [word, img]);
+            await this.db.none('UPDATE wordTable SET img = $2 WHERE word = $1', [word, img]);
             } catch (err) {
             console.log(err);
             }
         }
-        if (lang !== ''){
-            try {
-                await this.db.none('CREATE TABLE '+ lang +'Table (word VARCHAR(50) REFERENCES wordTable(word) ON DELETE CASCADE, def VARCHAR(400), PRIMARY KEY (word))');
-                } catch (e) {
-                console.log('Already created.');
-                }
-            try{
-                await this.db.none('INSERT INTO '+ lang +'Table(word, def) values ($1, $2)', [word, definition]);
-            } catch (e){
-                await this.db.none('UPDATE '+ lang +'Table SET def = $2 WHERE word = $1', [word, definition]);
-            }
-        } 
+        // if (lang !== ''){
+        //     try {
+        //         await this.db.none('CREATE TABLE '+ lang +'Table (word VARCHAR(50) REFERENCES wordTable(word) ON DELETE CASCADE, def VARCHAR(400), PRIMARY KEY (word))');
+        //         } catch (e) {
+        //         console.log('Already created.');
+        //         }
+        //     try{
+        //         await this.db.none('INSERT INTO '+ lang +'Table(word, def) values ($1, $2)', [word, definition]);
+        //     } catch (e){
+        //         await this.db.none('UPDATE '+ lang +'Table SET def = $2 WHERE word = $1', [word, definition]);
+        //     }
+        // } 
     }
 
     //only work on update session
@@ -90,13 +89,29 @@ export class Database {
 
     public async get(word:string): Promise<any>{ //get word, img, languages
         console.log("get: word = " + word);
-    try{
-        await this.db.none('UPDATE wordTable SET views = views +1 WHERE word = $1',[word]);
-    } catch(err){
-        console.log(err);
+        try{
+            await this.db.none('UPDATE wordTable SET views = views +1 WHERE word = $1',[word]);
+        } catch(err){
+            console.log(err);
+        }
+        try {
+            let result = await this.db.one('SELECT * FROM wordTable WHERE word = $1', [word]);
+            console.log("get: returned " + JSON.stringify(result));
+            if (result) {
+            return result;
+            } else {
+            return null;
+            }
+        } catch (err) {
+            // Failed search.
+            return null;
+        }
     }
+
+    public async mainview(word:string): Promise<any>{ //get word, img, languages
+        console.log("get: all word = " + word);
 	try {
-		let result = await this.db.one('SELECT * FROM wordTable WHERE word = $1', [word]);
+		let result = await this.db.any('SELECT * FROM wordTable limit 5;');
 	    console.log("get: returned " + JSON.stringify(result));
 	    if (result) {
 		return result;
@@ -134,6 +149,98 @@ export class Database {
         }
         }
 
+    public async isFound(word:string) : Promise<boolean>  {
+	console.log("isFound: word = " + word);
+	let v = await this.get(word);
+	console.log("is found result = " + v);
+	if (v === null) {
+	    return false;
+	} else {
+	    return true;
+	}
+    }
+
+    // USER
+    public async createUser(id:string, username:string,password:string,portrait:string='./a.png',registered_at:string,location:string) : Promise<void>{
+        console.log("put: user id = " + id + ", password = " + password+", portrait"+ portrait);
+        try {
+            await this.db.none('INSERT INTO userinfo(id,username, password, portrait, registered_at, location) values ($1, $2, $3,$4,$5,$6)', [id,username, password, portrait, registered_at, location]);
+            console.log('added user successfully')
+        } catch (err) {
+            console.log("username existsed!")
+        }
+    }
+
+    public async updateUser(id:string, username:string,password:string,portrait:string='./a.png',location:string) : Promise<void>{
+        console.log("put: user id = " + id + ", password = " + password+", portrait"+ portrait);
+
+        try {
+                await this.db.none('UPDATE userinfo SET password = $2, username = $3, portrait= $4, location = $5 WHERE id = $1', [id, password,username,portrait,location]);
+                } catch (err) {
+                console.log(err);
+                }
+        
+    }
+
+
+
+
+    public async getUser(id:string) : Promise<string | null> {
+        console.log("get: id = " + id);
+        try {
+            let result = await this.db.one('SELECT * FROM userinfo WHERE id = $1', id);
+            console.log("get: returned " + JSON.stringify(result));
+            console.log("get: value "+result.value);
+            if (result) {
+            return JSON.stringify(result);
+            } else {
+            return null;
+            }
+        } catch (err) {
+            // Failed search.
+            return null;
+        }
+        }
+
+        
+    public async delUser(id: string) : Promise<void> {
+        console.log("DELETE");
+        try {
+            // DELETE
+            // YOUR CODE GOES HERE
+            // let result = await this.db...;
+            let result = await this.db.one('DELETE FROM userinfo WHERE id = $1', id);
+            console.log("result = " + result);
+        } catch (err) {
+            // Not found.
+        }
+        }
+
+    public async isRightPassword(id: string,password:string) : Promise<any>  {
+        console.log("password: key = " + id, password);
+        let result = await this.db.one('SELECT password,username FROM userinfo WHERE id = $1', id);
+        console.log(JSON.stringify(result));
+
+        if (result.password === password) {
+            console.log("right password!");
+            return result.username;
+        } else {
+            return null;
+        }
+        }
+    public async userisFound(id: string) : Promise<boolean>  {
+        console.log("Found user" + id);
+        try{
+            let result = await this.db.one('SELECT username FROM userinfo WHERE id = $1', id);
+            return true;
+        }catch(e){
+            console.log("no such user");
+            return false;
+        }
+
+        }
+
+    // comment
     public async addcomment(pronunID:number, user:string, text:string): Promise<any>{
         try{
             await this.db.none('INSERT INTO comment(pronunID, userID, text) VALUES ($1, $2, $3)', [pronunID, user, text]);
@@ -169,66 +276,51 @@ export class Database {
             return null;
         }
     }
-////////////////////////
-    public async addPronun(word:string, audio:string, address:string):Promise<any>{
-        try{
-            await this.db.any('INSERT INTO pronunTable(word, userID, pronunciation, address, likes) VALUES ($1,$2,$3,$4,$5)',[word, 'John', audio, address, 0]);
-            let result = {'result':'success'};
-            return result;
-        } catch(err){
-            console.log('error pronunciation cannot be added');
-            return null;
-        }
-    }
 
-    public async getPronun(word:string): Promise<any>{
-        try{
-            let result = await this.db.any('SELECT * FROM pronTable WHERE word = $1', [word]);
-            console.log('get pronunciaiton for word: '+word + ' success')
-            return result;
-        }catch (err) {
-            // Not found.
-            console.log('error comment deletion failed');
-            return null;
-        }
-    }
-    public async addLikes(pronunID:number): Promise<any>{
-        try{
-            await this.db.none('UPDATE pronTable SET likes = likes +1 WHERE id = $1',[pronunID]);
-            let result = await this.db.one('SELECT * FROM pronTable WHERE id = $1', [pronunID]);
-            return result;
-        }catch (err) {
-            // Not found.
-            console.log('error add likes failed');
-            return null;
-        }
-    }
-    
-/*
-    public async addPron(ID:number, word:string, pronunciation: string, addr:string, lang:string, spelling:string): Promise<void>{ //add pronunciaiton to db, take ID, word spelling, pronunciation, addr
-        let db = this.client.db(this.dbName);   
-        let pronCollection = db.collection('pronCollection');
-        console.log("add pronunciation in "+addr+" to word "+word);
-        let result = await pronCollection.updateOne({'id':ID},{$set:{'word':word, 'pronunciation':pronunciation, 'address':addr, 'language':lang, 'spelling':spelling}}, { 'upsert' : true } );
-        console.log(JSON.stringify(result));
-    }
 
-    public async delPron(ID:number): Promise<void>{ //add pronunciaiton to db, take ID, word spelling, pronunciation, addr
-        let db = this.client.db(this.dbName);   
-        let pronCollection = db.collection('pronCollection');
-        console.log("delete pronunciation with ID "+ID);
-        let result = await pronCollection.deleteMany({'id':ID});
-        console.log("result = " +JSON.stringify(result));
-    }
-*/
-    public async isFound(word:string) : Promise<boolean>  {
-	console.log("isFound: word = " + word);
-	let v = await this.get(word);
-	console.log("is found result = " + v);
-	if (v === null) {
-	    return false;
-	} else {
-	    return true;
-	}
+//Pronunciation
+public async addPronun(word: string, audio:string, address:string): Promise<any>{
+    try{
+        await this.db.any('INSERT INTO pronunTable(word, userID, pronunciation, address, likes) VALUES ($1, $2, $3, $4, $5)', [word, 'John', audio, address, 0]);
+        let result = {'result' : 'success'};
+        return result;
+    } catch(err){
+        console.log('error pronunciation cannot be added');
+        return null;
     }
 }
+
+public async getPronun(word: string): Promise<any>{
+    try{
+        let result = await this.db.any('SELECT * FROM pronTable WHERE word = $1', [word]);
+        console.log('get pronunciation for word: ' +word + ' success');
+        return result;
+    }catch (err){ //not found
+        console.log('error comment deletion failed');   
+        return null;
+    }
+}
+
+public async addLikes(pronunID: number): Promise<any>{
+    try{
+        await this.db.none('UPDATE pronTable SET likes = likes +1 WHERE id = $1', [pronunID]);
+        let result = await this.db.one('SELECT * FROM pronTable WHERE id = $1', [pronunID]);
+        return result;
+    }catch(err){ //not found
+        console.log('error add likes failed');
+        return null;
+    }
+}
+public async delPronun(id : number) : Promise<any>{
+    try{
+        await this.db.any('DELETE FROM pronTable WHERE id= = $1', [id]);
+        let result = {'result' : 'success'};
+        return result;
+    } catch(err){
+        console.log(err);
+        console.log('error pronunciation cannot be deleted');
+        return null;
+    }
+}
+}
+

@@ -1,4 +1,4 @@
-const url = "https://gentle-fortress-42768.herokuapp.com/word";
+const url = "https://gentle-fortress-42768.herokuapp.com/public/word";
 
 async function postData(url, data) {
     const resp = await fetch(url,
@@ -73,13 +73,16 @@ function loadPronun(){
                     commentBlock = '<div class = "comment" id = "commentblock'+ pronuns[i]['id']+'" style="display: none"> <br/>';
                     let text = '<div class="userData">'+
                     '<img src="https://www.mariowiki.com/images/thumb/2/2b/Isabelle_SSBU.png/1200px-Isabelle_SSBU.png" class="portrait">'+ //TBC
-                    '<p class="names">Isabelle</p>'+ //TBC
-                    '<input type="image" src="https://pngimage.net/wp-content/uploads/2018/06/speaker-button-png-.png" onclick="runPronun('+ pronuns[i]['pronunciation'] +')" class="listen"> Click to hear pronunciation</input><br/>'+
+                    '<p class="names">Anonymous</p>'+ //TBC
+                    '<input type="image" src="https://pngimage.net/wp-content/uploads/2018/06/speaker-button-png-.png" onclick="runPronun('+ pronuns[i]['id'] +')" class="listen"> Click to get pronunciation</input>'+
+                    '<div id = "audio'+ pronuns[i]['id'] +'" style ="display:none" ><video width="320" height="240"><source src="'+ pronuns[i]['pronunciation'] +'" type="video/mp4"></video></div><br/>' +
                     '<a target="_blank" href = https://www.google.com/maps/search/'+ pronuns[i]['address'] +'>'+ pronuns[i]['address'] +'</a><br/><br/>'+
                     '<button type="button" onclick="showComment('+ pronuns[i]['id'] +')" class="btn btn-primary">Comment</button>'+
                     '<button type="button" id="like'+pronuns[i]['id']+'" onclick="likeIt('+ pronuns[i]['id'] +')" class="btn btn-primary">Like it!</button><br/>'+ 
-                    '<div class = "comment" id = "commentblock'+ pronuns[i]['id']+'"> <br/>'+
-                    '</div><hr></div><br/>';
+                    '<div class = "comment" id = "commentblock'+ pronuns[i]['id']+'"> <br/></div>'+
+                    '<button type="button" onclick="deletPron('+ pronuns[i]['id'] +')" class = "btn btn-danger">Delete</button><br/>'+
+                    '<hr></div>' +
+                    '<br/>';
                     insert = insert + text;
                 }
                 outputBlock.innerHTML = insert;
@@ -156,8 +159,8 @@ function addDef(){
 	(async () => {
         let doc = document;
         let word = window.location.search.substring(6);
-        let langElement = doc.getElementById("add_lang");
-        let defElement =  doc.getElementById("add_def");
+        let langElement = doc.getElementById("add_lang")
+        let defElement =  doc.getElementById("add_def")
         let outputElement = doc.getElementById("updateStatus");
         if(langElement !== null && defElement !== null){
             let lang = langElement.value;
@@ -183,10 +186,6 @@ function addDef(){
 
 function goToPronunPage(){
     window.location.href="upload.html";
-}
-
-function runPronun(pronun){
-    return
 }
 
 function showComment(pronunID){
@@ -230,7 +229,7 @@ function addComment(pronunID){
         
         if(inputElement !== null && outputElement !== null){
             let text = inputElement.value
-            const data = {'pronunID': pronunID, 'user': 'Kicks', 'text': text }; //user name TBC
+            const data = {'pronunID': pronunID, 'user': 'Anonymous', 'text': text }; //user name TBC
             const newURL = url + "/addcomment"; 
             const resp = await postData(newURL,data);
             const j = await resp.json();
@@ -246,29 +245,55 @@ function addComment(pronunID){
         }
     })();
 }
+function runPron(pronunID){ 
+    let doc = document;
+    let outputElement = doc.getElementById("audio"+pronunID);
+    if(outputElement !== null){
+        if(outputElement.style.display=="none"){
+            outputElement.style.display="";
+        }else{
+            outputElement.style.display="none";
+        }
 
-function likeIt(pronunID){
-    (async () => {
+    }
+}
+
+function likeIt(pronunID){ //user likes pronunciation
+    (async()=>{
         let doc = document;
-        let outputElement = doc.getElementById("like"+ pronunID);
-        if(outputElement !== null){
-            const data = {'pronunID': pronunID};
+        let outputElement = doc.getElementById("like" + pronunID);
+        if(outputElement !==null){
+            const data = {'pronunID' : pronunID};
             const newURL = url + "/addPronunLikes";
 
-            const resp = await postData(newURL,data);
+            const resp = await postData(newURL, data);
             const j = await resp.json();
-            if (j['result'] !== 'error') {	
-                outputElement.innerHTML = "Like it! (" + j['likes']+" likes )";
-            } else {
-                outputElement.innerHTML = "610: Error: Like Failed</b>";
-        
-            } 
-        } else{
-            outputElement.innerHTML = "210: input missing.</b>";
+            if(j['result'] !== 'error'){
+                outputElement.innerHTML = "Like it! (" + j['likes'] + "likes)";
+            }else{
+                outputElement.innerHTML = "610: Error: Like Failed<br>";
+            }
+        }else{
+            outputElement.innerHTML = "210: input missing.</br>";
         }
     })();
 }
 
+//user deletes pronunication
+function deletePronun(pronunID){
+    (async() =>{
+        const data = {'ID' : pronunID};
+        const newURL= url+"/deletePronun";
+
+        const resp = await postData(newURL, data);
+        const j = await resp.json();
+        if(j['result'] !== 'error'){
+            location = location;
+        }else{
+            outputElement.innerHTML = "710: Deletion Failed</br>";
+        }
+    })();
+}
 window.onload = function(){
     loadWord(); 
     loadPronun();}

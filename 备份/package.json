@@ -1,0 +1,30 @@
+{
+  "name": "326-testRepo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main_sql.js",
+  "dependencies": {
+    "browserify": "^16.5.1",
+    "express": "^4.17.1",
+    "level": "^6.0.1",
+    "mongodb": "^3.5.6",
+    "pg-promise": "^10.5.2",
+    "typescript": "^3.8.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node main_sql.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zipeijiang/326-testRepo.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zipeijiang/326-testRepo/issues"
+  },
+  "homepage": "https://github.com/zipeijiang/326-testRepo#readme"
+}

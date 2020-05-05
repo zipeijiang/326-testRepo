@@ -12,7 +12,5 @@
         "pretty": true,
         "module": "commonjs",
     },
-    // "files": [ "client.ts", "postdata.ts" ]// change me
-    "files": [ "client_mainpage_public.ts", "postdata.ts" ]
-
+    "files": [ "word.ts", "postdata.ts" ] // change me
 }

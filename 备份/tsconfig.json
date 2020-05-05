@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+	"target": "es2016",
+	"skipLibCheck": true,
+//	"noImplicitAny": true,
+	"noImplicitReturns": true,
+	"forceConsistentCasingInFileNames": true,
+	"noImplicitThis": true,
+//	"noUnusedParameters": true,
+	"noFallthroughCasesInSwitch": true,
+	"strictNullChecks": true,
+	"pretty": true,
+	"module": "commonjs",
+    },
+    "files": [ "server_sql.ts", "database_sql.ts", "main_sql.ts" ]
+}
